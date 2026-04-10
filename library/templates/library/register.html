@@ -1,0 +1,237 @@
+{% extends 'library/base.html' %}
+
+{% block auth_content %}
+<style>
+    :root {
+        --glass: rgba(20, 22, 28, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --accent-glow: rgba(201, 168, 76, 0.3);
+    }
+
+    .auth-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: linear-gradient(rgba(14, 15, 19, 0.4), rgba(14, 15, 19, 0.6)), 
+                          url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2600');
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.85) contrast(1.1);
+        z-index: -1;
+        animation: slow-zoom 20s infinite alternate;
+    }
+
+    @keyframes slow-zoom {
+        from { transform: scale(1); }
+        to { transform: scale(1.05); }
+    }
+
+    .login-page {
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .login-box {
+        background: rgba(20, 22, 28, 0.72);
+        backdrop-filter: blur(34px) saturate(210%);
+        -webkit-backdrop-filter: blur(34px) saturate(210%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        padding: 48px;
+        width: 92%;
+        max-width: 540px;
+        max-height: 94vh;
+        overflow-y: auto;
+        box-shadow: 0 40px 140px rgba(0, 0, 0, 0.7);
+        position: relative;
+    }
+
+    /* Custom thin scrollbar for the glass box */
+    .login-box::-webkit-scrollbar { width: 4px; }
+    .login-box::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 10px; }
+
+    .login-box::before {
+        content: '';
+        position: absolute;
+        top: -1px; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        opacity: 0.5;
+    }
+
+    .login-brand {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .login-brand .icon {
+        width: 60px; height: 60px;
+        background: radial-gradient(circle, var(--gold-dim) 0%, transparent 70%);
+        border: 1px solid var(--gold);
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 12px;
+    }
+
+    .login-brand h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        letter-spacing: 0.02em;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        height: 46px;
+        font-size: 13.5px;
+        color: var(--text) !important;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: var(--gold) !important;
+        box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1) !important;
+    }
+
+    .form-group { position: relative; margin-bottom: 18px; }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 36px;
+        cursor: pointer;
+        color: var(--text-muted);
+        z-index: 10;
+        transition: color 0.2s;
+        font-size: 16px;
+    }
+
+    .password-toggle:hover { color: var(--gold); }
+
+    .btn-primary {
+        height: 50px;
+        font-size: 15px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        border: none;
+        margin-top: 20px;
+    }
+
+    .login-footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: center;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .helptext {
+        font-size: 10px;
+        color: var(--text-dim);
+        margin-top: 5px;
+        display: block;
+        line-height: 1.4;
+    }
+</style>
+
+<div class="auth-bg"></div>
+
+<div class="login-page">
+    <div class="login-box">
+        <div class="login-brand">
+            <div class="icon">✨</div>
+            <h1>Create Account</h1>
+            <p class="text-muted">Join the Grand Archives</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+                {% if form.username.help_text %}<span class="helptext">{{ form.username.help_text|safe }}</span>{% endif %}
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                <i class="bi bi-eye password-toggle" id="togglePassword1"></i>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                <i class="bi bi-eye password-toggle" id="togglePassword2"></i>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error mb-3">
+                    {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-person-plus-fill"></i> Initialize Account
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p class="text-muted text-sm">
+                Already have an account? <a href="{% url 'login' %}" class="text-gold" style="text-decoration:none;font-weight:600;">Sign In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const setupToggle = (toggleId, inputSelector) => {
+        const toggle = document.querySelector(toggleId);
+        const input = document.querySelector(inputSelector);
+        if (toggle && input) {
+            toggle.addEventListener('click', function() {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                this.classList.toggle('bi-eye');
+                this.classList.toggle('bi-eye-slash');
+            });
+        }
+    };
+    setupToggle('#togglePassword1', 'input[name="password1"]');
+    setupToggle('#togglePassword2', 'input[name="password2"]');
+</script>
+{% endblock %}

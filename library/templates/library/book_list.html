@@ -1,0 +1,112 @@
+{% extends 'library/base.html' %}
+{% block title %}Books{% endblock %}
+{% block page_title %}Books{% endblock %}
+
+{% block topbar_actions %}
+    {% if user.is_staff or user.is_superuser %}
+    <a href="{% url 'book_add' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> Add Book
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Book Catalog</h1>
+        <p>{{ total }} book{{ total|pluralize }} in the system</p>
+    </div>
+</div>
+
+<!-- Search/Filter -->
+<div class="card mb-4">
+    <div class="card-body" style="padding:16px;">
+        <form method="get" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+                <label class="form-label">Search</label>
+                {{ form.query }}
+            </div>
+            <div style="min-width:160px;">
+                <label class="form-label">Category</label>
+                {{ form.category }}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;padding-bottom:2px;">
+                {{ form.available_only }}
+                <label class="text-sm text-muted">Available only</label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:38px;">
+                <i class="bi bi-search"></i> Search
+            </button>
+            <a href="{% url 'book_list' %}" class="btn btn-outline" style="height:38px;">Reset</a>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title & Author</th>
+                    <th>ISBN</th>
+                    <th>Category</th>
+                    <th>Copies</th>
+                    <th>Available</th>
+                    <th>Shelf</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        <div style="font-weight:500;">{{ book.title }}</div>
+                        <div class="text-sm text-muted">{{ book.author }}</div>
+                    </td>
+                    <td class="font-mono text-sm text-muted">{{ book.isbn }}</td>
+                    <td>
+                        {% if book.category %}
+                            <span class="badge badge-muted">{{ book.category.name }}</span>
+                        {% else %}
+                            <span class="text-muted text-sm">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm">{{ book.total_copies }}</td>
+                    <td>
+                        {% if book.available_copies > 0 %}
+                            <span class="badge badge-green">{{ book.available_copies }}</span>
+                        {% else %}
+                            <span class="badge badge-red">0</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm font-mono text-muted">{{ book.shelf_location|default:"—" }}</td>
+                    <td>
+                        <div style="display:flex;gap:4px;">
+                            <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline btn-icon btn-sm" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if user.is_staff or user.is_superuser %}
+                            <a href="{% url 'book_edit' book.pk %}" class="btn btn-outline btn-icon btn-sm" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger btn-icon btn-sm" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">
+                        <i class="bi bi-book" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.3;"></i>
+                        No books found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

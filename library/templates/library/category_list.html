@@ -1,0 +1,45 @@
+{% extends 'library/base.html' %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+
+{% block topbar_actions %}
+    {% if user.is_staff or user.is_superuser %}
+    <a href="{% url 'category_add' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Category</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div><h1>Book Categories</h1></div>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>Category</th><th>Description</th><th>Books</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td style="font-weight:500;">{{ cat.name }}</td>
+                    <td class="text-sm text-muted">{{ cat.description|default:"—" }}</td>
+                    <td><span class="badge badge-muted">{{ cat.book_count }}</span></td>
+                    <td>
+                        <div style="display:flex;gap:4px;">
+                            {% if user.is_staff or user.is_superuser %}
+                            <a href="{% url 'category_edit' cat.pk %}" class="btn btn-outline btn-icon btn-sm"><i class="bi bi-pencil"></i></a>
+                            {% else %}
+                            <span class="text-muted text-sm">—</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted);">No categories yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'library/base.html' %}
+{% block title %}{{ member.full_name }}{% endblock %}
+{% block page_title %}Member Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ member.full_name }}</h1>
+        <p>{{ member.member_id }} · {{ member.get_membership_type_display }}</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+        {% if can_manage_member %}
+        <a href="{% url 'member_edit' member.pk %}" class="btn btn-outline"><i class="bi bi-pencil"></i> Edit</a>
+        <a href="{% url 'member_list' %}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Back</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid-2" style="gap:20px;">
+    <div class="card">
+        <div class="card-header">Member Information</div>
+        <div class="card-body">
+            <table style="width:100%;">
+                <tr><td class="text-muted text-sm" style="padding:8px 0;width:140px;">Email</td><td>{{ member.email }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Phone</td><td>{{ member.phone }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Status</td><td>
+                    {% if member.status == 'active' %}<span class="badge badge-green">Active</span>
+                    {% elif member.status == 'suspended' %}<span class="badge badge-red">Suspended</span>
+                    {% else %}<span class="badge badge-muted">Inactive</span>{% endif %}
+                </td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Joined</td><td class="font-mono">{{ member.join_date|date:"d M Y" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Expiry</td><td class="font-mono">{{ member.membership_expiry|date:"d M Y"|default:"-" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Books Out</td><td>{{ member.active_issues }} / {{ member.max_books_allowed }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Outstanding Fine</td><td>
+                    {% if member.total_fine > 0 %}
+                        <span class="badge badge-red">Rs. {{ member.total_fine }}</span>
+                    {% else %}
+                        <span class="text-green text-sm">None</span>
+                    {% endif %}
+                </td></tr>
+            </table>
+            {% if member.address %}
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                <div class="form-label">Address</div>
+                <p class="text-sm text-muted">{{ member.address }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>Borrow History</span>
+            {% if can_manage_member %}
+            <a href="{% url 'issue_book' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Issue Book</a>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Book</th><th>Issued</th><th>Due</th><th>Status</th><th>Fine</th></tr>
+                </thead>
+                <tbody>
+                    {% for issue in issues %}
+                    <tr>
+                        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ issue.book.title }}</td>
+                        <td class="text-sm font-mono">{{ issue.issue_date|date:"d M Y" }}</td>
+                        <td class="text-sm font-mono">{{ issue.due_date|date:"d M Y" }}</td>
+                        <td>
+                            {% if issue.effective_status == 'returned' %}<span class="badge badge-green">Returned</span>
+                            {% elif issue.effective_status == 'overdue' %}<span class="badge badge-red">Overdue</span>
+                            {% else %}<span class="badge badge-gold">Issued</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if issue.current_fine > 0 %}
+                                {% if issue.fine_paid %}
+                                    <span class="badge badge-green">Paid Rs. {{ issue.current_fine }}</span>
+                                {% else %}
+                                    <span class="badge badge-amber">Rs. {{ issue.current_fine }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted text-sm">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No books borrowed yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

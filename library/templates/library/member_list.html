@@ -1,0 +1,116 @@
+{% extends 'library/base.html' %}
+{% block title %}Members{% endblock %}
+{% block page_title %}Members{% endblock %}
+
+{% block topbar_actions %}
+    {% if user.is_staff or user.is_superuser %}
+    <a href="{% url 'member_add' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus"></i> Add Member
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Members</h1>
+        <p>{{ total }} member{{ total|pluralize }} registered</p>
+    </div>
+</div>
+
+<!-- Search/Filter -->
+<div class="card mb-4">
+    <div class="card-body" style="padding:16px;">
+        <form method="get" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Name, ID, email...">
+            </div>
+            <div style="min-width:150px;">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="suspended" {% if status == 'suspended' %}selected{% endif %}>Suspended</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:38px;">
+                <i class="bi bi-search"></i> Search
+            </button>
+            <a href="{% url 'member_list' %}" class="btn btn-outline" style="height:38px;">Reset</a>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Member ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Books Out</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td class="font-mono text-sm text-muted">{{ member.member_id }}</td>
+                    <td style="font-weight:500;">{{ member.full_name }}</td>
+                    <td class="text-sm text-muted">{{ member.email }}</td>
+                    <td class="text-sm">{{ member.phone }}</td>
+                    <td>
+                        <span class="badge badge-muted">{{ member.get_membership_type_display }}</span>
+                    </td>
+                    <td>
+                        {% if member.status == 'active' %}
+                            <span class="badge badge-green">Active</span>
+                        {% elif member.status == 'suspended' %}
+                            <span class="badge badge-red">Suspended</span>
+                        {% else %}
+                            <span class="badge badge-muted">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member.active_issues > 0 %}
+                            <span class="badge badge-amber">{{ member.active_issues }}</span>
+                        {% else %}
+                            <span class="text-muted text-sm">0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:4px;">
+                            <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline btn-icon btn-sm" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if user.is_staff or user.is_superuser %}
+                            <a href="{% url 'member_edit' member.pk %}" class="btn btn-outline btn-icon btn-sm" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'member_delete' member.pk %}" class="btn btn-danger btn-icon btn-sm" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">
+                        <i class="bi bi-people" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.3;"></i>
+                        No members found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

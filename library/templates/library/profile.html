@@ -1,0 +1,67 @@
+{% extends 'library/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div><h1>My Profile</h1><p>Manage your account settings</p></div>
+</div>
+
+<div class="grid-2" style="gap:20px;max-width:860px;">
+    <!-- Account Info -->
+    <div class="card">
+        <div class="card-header">Account Information</div>
+        <div class="card-body">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+                <div style="width:60px;height:60px;background:var(--gold-dim);border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold);">
+                    {{ user.username|first|upper }}
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:600;">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="text-sm text-muted">Administrator</div>
+                </div>
+            </div>
+            <table style="width:100%;">
+                <tr><td class="text-muted text-sm" style="padding:8px 0;width:120px;">Username</td><td class="font-mono">{{ user.username }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Email</td><td>{{ user.email|default:"—" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">First Name</td><td>{{ user.first_name|default:"—" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Last Name</td><td>{{ user.last_name|default:"—" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Joined</td><td class="font-mono">{{ user.date_joined|date:"d M Y" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Last Login</td><td class="font-mono">{{ user.last_login|date:"d M Y H:i"|default:"—" }}</td></tr>
+                <tr><td class="text-muted text-sm" style="padding:8px 0;">Superuser</td><td>
+                    {% if user.is_superuser %}
+                        <span class="badge badge-gold">Yes</span>
+                    {% else %}
+                        <span class="badge badge-muted">No</span>
+                    {% endif %}
+                </td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+        <div class="card-header">Change Password</div>
+        <div class="card-body">
+            <form method="post" action="{% url 'change_password' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="old_password" class="form-control" placeholder="Enter current password" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="new_password1" class="form-control" placeholder="At least 8 characters" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" name="new_password2" class="form-control" placeholder="Repeat new password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-shield-lock"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

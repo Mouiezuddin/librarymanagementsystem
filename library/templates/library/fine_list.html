@@ -1,0 +1,97 @@
+{% extends 'library/base.html' %}
+{% block title %}Fines{% endblock %}
+{% block page_title %}Fine Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Fine Management</h1>
+        <p>Track and collect overdue fines</p>
+    </div>
+</div>
+
+{% if unpaid_total > 0 %}
+<div style="margin-bottom:20px;padding:16px 20px;background:var(--amber-dim);border:1px solid rgba(245,166,35,0.3);border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+        <div class="text-sm text-muted" style="margin-bottom:2px;">Total Unpaid Fines</div>
+        <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--amber);">Rs. {{ unpaid_total }}</div>
+    </div>
+    <i class="bi bi-currency-rupee" style="font-size:40px;color:var(--amber);opacity:0.3;"></i>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    {% if is_admin %}<th>Member</th>{% endif %}
+                    <th>Book</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Days Overdue</th>
+                    <th>Fine Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in fines %}
+                <tr>
+                    {% if is_admin %}
+                    <td>
+                        <div style="font-weight:500;">{{ issue.member.full_name }}</div>
+                        <div class="text-sm text-muted">{{ issue.member.member_id }}</div>
+                    </td>
+                    {% endif %}
+                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ issue.book.title }}</td>
+                    <td class="text-sm font-mono">{{ issue.issue_date|date:"d M Y" }}</td>
+                    <td class="text-sm font-mono">{{ issue.due_date|date:"d M Y" }}</td>
+                    <td class="text-sm font-mono">{{ issue.return_date|date:"d M Y"|default:"-" }}</td>
+                    <td>
+                        {% if issue.days_overdue > 0 %}
+                            <span class="badge badge-red">{{ issue.days_overdue }}d</span>
+                        {% else %}
+                            <span class="text-muted text-sm">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-weight:600;color:var(--amber);">Rs. {{ issue.current_fine }}</td>
+                    <td>
+                        {% if issue.fine_paid %}
+                            <span class="badge badge-green"><i class="bi bi-check"></i> Paid</span>
+                        {% else %}
+                            <span class="badge badge-red">Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_staff or user.is_superuser %}
+                            {% if not issue.fine_paid and issue.effective_status == 'returned' %}
+                                <form method="post" action="{% url 'pay_fine' issue.pk %}" style="display:inline;"
+                                      onsubmit="return confirm('Mark payment as received for {{ issue.member.full_name }}?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-check-circle"></i> Collect
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted text-sm">{% if issue.fine_paid %}Done{% else %}Pending return{% endif %}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted text-sm">{% if issue.fine_paid %}Paid{% else %}Pending{% endif %}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if is_admin %}9{% else %}8{% endif %}" style="text-align:center;padding:40px;color:var(--text-muted);">
+                        <i class="bi bi-emoji-smile" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.3;"></i>
+                        No fines recorded
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

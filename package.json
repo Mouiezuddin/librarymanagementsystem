@@ -1,0 +1,12 @@
+{
+  "name": "nexa-lib-browser-tests",
+  "private": true,
+  "scripts": {
+    "qa:browser": "playwright test",
+    "qa:browser:headed": "playwright test --headed",
+    "qa:browser:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.0"
+  }
+}

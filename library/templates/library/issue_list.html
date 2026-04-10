@@ -1,0 +1,133 @@
+{% extends 'library/base.html' %}
+{% block title %}Issues & Returns{% endblock %}
+{% block page_title %}Issues & Returns{% endblock %}
+
+{% block topbar_actions %}
+    {% if user.is_staff or user.is_superuser %}
+    <a href="{% url 'issue_book' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> Issue Book
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Issues & Returns</h1>
+        <p>{{ total }} record{{ total|pluralize }}</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body" style="padding:16px;">
+        <form method="get" id="filterForm" style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;">
+            <input type="hidden" name="status" id="statusInput" value="{{ status }}">
+
+            <div style="flex:1;min-width:200px;">
+                <label class="form-label">Filter by Category</label>
+                <select name="category" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if selected_category == cat.pk|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display:flex;gap:4px;background:var(--bg3);padding:3px;border-radius:8px;border:1px solid var(--border);">
+                {% for s, label in status_tabs %}
+                <button type="button"
+                        onclick="document.getElementById('statusInput').value='{{ s }}'; document.getElementById('filterForm').submit();"
+                        class="btn btn-sm {% if status == s %}btn-primary{% else %}btn-outline{% endif %}"
+                        style="border-radius:6px; height:32px; padding:0 12px; border:none;">
+                    {{ label }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <a href="{% url 'issue_list' %}" class="btn btn-outline" style="height:38px;">Reset</a>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    {% if is_admin %}<th>Member</th>{% endif %}
+                    <th>Book</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                    <th>Fine</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr>
+                    <td class="text-muted text-sm font-mono">{{ issue.pk }}</td>
+                    {% if is_admin %}
+                    <td>
+                        <div style="font-weight:500;">{{ issue.member.full_name }}</div>
+                        <div class="text-sm text-muted">{{ issue.member.member_id }}</div>
+                    </td>
+                    {% endif %}
+                    <td style="max-width:180px;">
+                        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ issue.book.title }}</div>
+                        <div class="text-sm text-muted">{{ issue.book.author }}</div>
+                    </td>
+                    <td class="text-sm font-mono">{{ issue.issue_date|date:"d M Y" }}</td>
+                    <td class="text-sm font-mono {% if issue.days_overdue > 0 and issue.effective_status != 'returned' %}text-red{% endif %}">
+                        {{ issue.due_date|date:"d M Y" }}
+                        {% if issue.days_overdue > 0 and issue.effective_status != 'returned' %}
+                            <div class="text-sm" style="color:var(--red);">{{ issue.days_overdue }}d overdue</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm font-mono">{{ issue.return_date|date:"d M Y"|default:"-" }}</td>
+                    <td>
+                        {% if issue.effective_status == 'returned' %}<span class="badge badge-green">Returned</span>
+                        {% elif issue.effective_status == 'overdue' %}<span class="badge badge-red">Overdue</span>
+                        {% elif issue.effective_status == 'lost' %}<span class="badge badge-amber">Lost</span>
+                        {% else %}<span class="badge badge-gold">Issued</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if issue.current_fine > 0 %}
+                            {% if issue.fine_paid %}
+                                <span class="badge badge-green">Paid Rs. {{ issue.current_fine }}</span>
+                            {% else %}
+                                <span class="badge badge-red">Rs. {{ issue.current_fine }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted text-sm">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_staff or user.is_superuser %}
+                            {% if issue.effective_status != 'returned' %}
+                                <a href="{% url 'return_book' issue.pk %}" class="btn btn-outline btn-sm">
+                                    <i class="bi bi-arrow-return-left"></i> Return
+                                </a>
+                            {% else %}
+                                <span class="text-muted text-sm">Completed</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted text-sm">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if is_admin %}9{% else %}8{% endif %}" style="text-align:center;padding:40px;color:var(--text-muted);">
+                        <i class="bi bi-arrow-left-right" style="font-size:32px;display:block;margin-bottom:10px;opacity:0.3;"></i>
+                        No records found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

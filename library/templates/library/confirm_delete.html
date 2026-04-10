@@ -1,0 +1,25 @@
+{% extends 'library/base.html' %}
+{% block title %}Confirm Delete{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div style="max-width:480px;margin:40px auto;">
+    <div class="card" style="border-color:rgba(224,85,85,0.3);">
+        <div class="card-body" style="text-align:center;padding:36px;">
+            <div style="width:60px;height:60px;background:var(--red-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px;color:var(--red);">
+                <i class="bi bi-trash"></i>
+            </div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px;">Delete {{ type }}</h2>
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">
+                Are you sure you want to delete <strong style="color:var(--text);">{{ object }}</strong>?
+                This action cannot be undone.
+            </p>
+            <form method="post" style="display:flex;gap:10px;justify-content:center;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Yes, Delete</button>
+                <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

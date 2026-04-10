@@ -1,0 +1,103 @@
+{% extends 'library/base.html' %}
+{% block title %}Issue Book{% endblock %}
+{% block page_title %}Issue Book{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div><h1>Issue a Book</h1><p>Assign a book to a library member</p></div>
+    <a href="{% url 'issue_list' %}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:560px;">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Member</label>
+                {{ form.member }}
+                {% if form.member.errors %}<div class="text-sm text-red mt-2">{% for e in form.member.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                    Book
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="bookSearch" class="form-control" placeholder="Search title/author..." style="width: auto; height: 30px; font-size: 11px; padding: 2px 8px;">
+                        <select id="categoryFilter" class="form-select" style="width: auto; height: 30px; font-size: 11px; padding: 2px 8px;">
+                            <option value="">Filter by Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.pk }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </label>
+                {{ form.book }}
+                {% if form.book.errors %}<div class="text-sm text-red mt-2">{% for e in form.book.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Due Date</label>
+                {{ form.due_date }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Remarks (optional)</label>
+                {{ form.remarks }}
+            </div>
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+            {% endif %}
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-right-circle"></i> Issue Book</button>
+                <a href="{% url 'issue_list' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookSearch = document.getElementById('bookSearch');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const bookSelect = document.querySelector('select[name="book"]');
+        const bookCategoryMap = {{ book_category_map|safe }};
+        
+        // Store all original options
+        const originalOptions = Array.from(bookSelect.options);
+        
+        function filterBooks() {
+            const searchQuery = bookSearch.value.toLowerCase().trim();
+            const selectedCategoryId = categoryFilter.value;
+            
+            // Clear current options
+            bookSelect.innerHTML = '';
+            
+            // Filter and re-add options
+            originalOptions.forEach(option => {
+                if (!option.value) {
+                    bookSelect.appendChild(option); // Keep the empty/placeholder option
+                    return;
+                }
+                
+                const bookId = option.value;
+                const bookTitleMatch = option.text.toLowerCase().includes(searchQuery);
+                const bookCategoryId = bookCategoryMap[bookId];
+                
+                const matchesCategory = !selectedCategoryId || String(bookCategoryId) === String(selectedCategoryId);
+                const matchesSearch = !searchQuery || bookTitleMatch;
+                
+                if (matchesCategory && matchesSearch) {
+                    bookSelect.appendChild(option);
+                }
+            });
+            
+            // If the currently selected book is no longer in the list, reset choice
+            if (!Array.from(bookSelect.options).some(opt => opt.selected)) {
+                bookSelect.selectedIndex = 0;
+            }
+        }
+        
+        categoryFilter.addEventListener('change', filterBooks);
+        bookSearch.addEventListener('input', filterBooks);
+    });
+</script>
+{% endblock %}
