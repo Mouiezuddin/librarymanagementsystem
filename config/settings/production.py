@@ -21,6 +21,7 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_SSL_REDIRECT = get_bool_env('SECURE_SSL_REDIRECT', default=False) # Set to True if using HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # WhiteNoise Configuration for Static Files
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
