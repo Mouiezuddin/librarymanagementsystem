@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 def setup_admin_quick(request):
     try:
         user, created = User.objects.get_or_create(username='Mouiezuddin')
-        user.set_password('Mouiez1234!!')
+        user.set_password('8867555660aMK')
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -14,7 +14,7 @@ def setup_admin_quick(request):
         html = f"""
         <h3>Superuser Account Ready! ({status})</h3>
         <p><strong>Username:</strong> Mouiezuddin<br>
-        <strong>Password:</strong> Mouiez1234!!</p>
+        <strong>Password:</strong> 8867555660aMK</p>
         <p>You can now log in to the admin panel using these credentials.</p>
         <br>
         <p><a href='/admin/' style='padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>Go to Admin Login</a></p>
