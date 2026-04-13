@@ -7,9 +7,9 @@ Schedule with cron for daily execution:
     0 0 * * * /path/to/venv/bin/python /path/to/manage.py update_fines
 """
 
-from django.core.management.base import BaseCommand
-from django.utils import timezone
-from apps.library.models import BookIssue
+from django.core.management.base import BaseCommand  # type: ignore
+from django.utils import timezone  # type: ignore
+from apps.library.models import BookIssue  # type: ignore
 
 
 class Command(BaseCommand):

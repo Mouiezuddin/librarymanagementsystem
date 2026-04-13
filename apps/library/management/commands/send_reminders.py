@@ -5,10 +5,10 @@ Usage:  python manage.py send_reminders
         python manage.py send_reminders --days 3
 """
 
-from django.core.management.base import BaseCommand
-from django.utils import timezone
+from django.core.management.base import BaseCommand  # type: ignore
+from django.utils import timezone  # type: ignore
 from datetime import timedelta
-from apps.library.models import BookIssue, Notification
+from apps.library.models import BookIssue, Notification  # type: ignore
 
 
 class Command(BaseCommand):
