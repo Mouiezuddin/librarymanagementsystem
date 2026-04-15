@@ -85,13 +85,13 @@ class Command(BaseCommand):
                 User.objects.create_superuser('admin', 'admin@library.com', 'admin123')
                 self.stdout.write('  Created demo admin user (admin / admin123)')
                 admin = User.objects.get(username='admin')
-            elif not demo_admin.is_superuser:
-                demo_admin.is_superuser = True
-                demo_admin.is_staff = True
-                demo_admin.save(update_fields=['is_superuser', 'is_staff'])
-                self.stdout.write('  Promoted existing admin username to superuser.')
-                admin = demo_admin
             else:
+                if not demo_admin.is_superuser:
+                    demo_admin.is_superuser = True
+                    demo_admin.is_staff = True
+                demo_admin.set_password('admin123')
+                demo_admin.save(update_fields=['is_superuser', 'is_staff', 'password'])
+                self.stdout.write('  Verified demo admin user and reset password to admin123.')
                 admin = demo_admin
 
         cats = {}
