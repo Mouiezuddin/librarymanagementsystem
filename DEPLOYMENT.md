@@ -83,7 +83,7 @@ python manage.py check --deploy
 Use Gunicorn:
 
 ```bash
-gunicorn lms_project.wsgi:application -c gunicorn.conf.py
+gunicorn config.wsgi:application -c gunicorn.conf.py
 ```
 
 The included `Procfile` can be used on platforms that support it.
