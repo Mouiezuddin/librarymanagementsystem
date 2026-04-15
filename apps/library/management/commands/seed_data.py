@@ -79,10 +79,20 @@ class Command(BaseCommand):
             Category.objects.all().delete()
 
         admin = User.objects.filter(is_superuser=True).order_by('id').first()
-        if settings.ENABLE_DEMO_DATA and not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser('admin', 'admin@library.com', 'admin123')
-            self.stdout.write('  Created demo admin user (admin / admin123)')
-            admin = User.objects.get(username='admin')
+        demo_admin = User.objects.filter(username='admin').first()
+        if settings.ENABLE_DEMO_DATA:
+            if demo_admin is None:
+                User.objects.create_superuser('admin', 'admin@library.com', 'admin123')
+                self.stdout.write('  Created demo admin user (admin / admin123)')
+                admin = User.objects.get(username='admin')
+            elif not demo_admin.is_superuser:
+                demo_admin.is_superuser = True
+                demo_admin.is_staff = True
+                demo_admin.save(update_fields=['is_superuser', 'is_staff'])
+                self.stdout.write('  Promoted existing admin username to superuser.')
+                admin = demo_admin
+            else:
+                admin = demo_admin
 
         cats = {}
         for name in CATEGORIES:
