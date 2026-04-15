@@ -1,0 +1,43 @@
+═══════════════════════════════════════════════════════════════
+RENDER DEPLOYMENT - QUICK REFERENCE
+Service ID: rnd_pN3e6R4cFE2I8GsNUg8KPaEQt8aU
+═══════════════════════════════════════════════════════════════
+
+BUILD COMMAND:
+pip install -r requirements/production.txt && python manage.py collectstatic --noinput
+
+START COMMAND:
+gunicorn config.wsgi:application -c gunicorn.conf.py
+
+PRE-DEPLOY COMMAND:
+python manage.py migrate --noinput
+
+HEALTH CHECK PATH:
+/health/
+
+═══════════════════════════════════════════════════════════════
+MINIMUM REQUIRED ENVIRONMENT VARIABLES:
+═══════════════════════════════════════════════════════════════
+
+SECRET_KEY=<generate-strong-random-key-50-chars>
+DEBUG=False
+DJANGO_SETTINGS_MODULE=config.settings.production
+DATABASE_URL=<postgres-connection-string-from-render>
+ALLOWED_HOSTS=<your-app-name>.onrender.com
+CSRF_TRUSTED_ORIGINS=https://<your-app-name>.onrender.com
+
+═══════════════════════════════════════════════════════════════
+AFTER FIRST DEPLOY - RUN IN RENDER SHELL:
+═══════════════════════════════════════════════════════════════
+
+python manage.py createsuperuser
+
+═══════════════════════════════════════════════════════════════
+TEST ENDPOINTS:
+═══════════════════════════════════════════════════════════════
+
+Health: https://<your-app>.onrender.com/health/
+Admin:  https://<your-app>.onrender.com/admin/
+Home:   https://<your-app>.onrender.com/
+
+═══════════════════════════════════════════════════════════════
