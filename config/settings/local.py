@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ['*']
 
 # Use console email backend for development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
 # Enable features for development
 ENABLE_PUBLIC_REGISTRATION = True

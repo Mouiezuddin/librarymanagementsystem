@@ -3,7 +3,7 @@ builder = "RAILPACK"
 buildCommand = "python manage.py collectstatic --noinput"
 
 [deploy]
-startCommand = "gunicorn lms_project.wsgi:application -c gunicorn.conf.py"
+startCommand = "gunicorn config.wsgi:application -c gunicorn.conf.py"
 preDeployCommand = "python manage.py migrate --noinput"
 healthcheckPath = "/health/"
 healthcheckTimeout = 120

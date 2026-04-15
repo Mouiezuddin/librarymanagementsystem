@@ -1,1 +1,1 @@
-web: gunicorn lms_project.wsgi:application -c gunicorn.conf.py
+web: gunicorn config.wsgi:application -c gunicorn.conf.py

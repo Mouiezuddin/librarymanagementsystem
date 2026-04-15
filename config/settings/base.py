@@ -27,7 +27,18 @@ def append_unique(items, value):
 
 # -- Basic Settings --
 DEBUG = False
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-it')
+
+# SECRET_KEY validation - must be set via environment variable
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    # Only allow fallback in development/local environments
+    if os.environ.get('DJANGO_SETTINGS_MODULE', '').endswith('.local'):
+        SECRET_KEY = 'django-insecure-local-dev-key-only'
+    else:
+        raise RuntimeError(
+            "SECRET_KEY environment variable must be set. "
+            "Generate one using: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'"
+        )
 
 ALLOWED_HOSTS = get_list_env('ALLOWED_HOSTS', '127.0.0.1,localhost')
 

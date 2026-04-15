@@ -37,6 +37,20 @@ class Book(models.Model):
 
     class Meta:
         ordering = ['title']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(total_copies__gte=1),
+                name='book_total_copies_positive'
+            ),
+            models.CheckConstraint(
+                check=models.Q(available_copies__gte=0),
+                name='book_available_copies_non_negative'
+            ),
+            models.CheckConstraint(
+                check=models.Q(available_copies__lte=models.F('total_copies')),
+                name='book_available_lte_total'
+            ),
+        ]
 
     def __str__(self):
         return f"{self.title} by {self.author}"

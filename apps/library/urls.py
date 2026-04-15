@@ -55,7 +55,4 @@ urlpatterns = [
     path('reports/export/issues/', views.export_issues_csv, name='export_issues'),
     path('reports/trigger-alerts/', views.trigger_overdue_alerts, name='trigger_alerts'),
     path('reports/seed-data/', views.seed_books_view, name='seed_data'),
-    
-    # Temporary route for setting up Superuser without a Shell
-    path('setup-admin/', __import__('apps.library.views_setup', fromlist=['']).setup_admin_quick, name='setup_admin'),
 ]
