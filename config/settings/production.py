@@ -40,16 +40,24 @@ STORAGES = {
 }
 
 # Database configuration
-# Use Supabase if configured, otherwise fall back to DATABASE_URL
-if os.environ.get('SUPABASE_URL') and os.environ.get('SUPABASE_KEY'):
-    # Using Supabase - construct PostgreSQL connection string
-    # Supabase PostgreSQL connection format
-    supabase_project_ref = os.environ.get('SUPABASE_PROJECT_REF', 'otnctayrocscihsmhhcs')
-    supabase_db_password = os.environ.get('SUPABASE_DB_PASSWORD', '')
-    
-    if supabase_db_password:
-        # If database password is provided, use direct PostgreSQL connection
-        DATABASES['default'] = {
+# Priority: Supabase PostgreSQL > DATABASE_URL > SQLite fallback
+supabase_url = os.environ.get('SUPABASE_URL', '')
+supabase_key = os.environ.get('SUPABASE_KEY', '')
+supabase_project_ref = os.environ.get('SUPABASE_PROJECT_REF', 'otnctayrocscihsmhhcs')
+supabase_db_password = os.environ.get('SUPABASE_DB_PASSWORD', '')
+database_url = os.environ.get('DATABASE_URL', '')
+
+# Log what we found (for debugging)
+print(f"DEBUG: SUPABASE_URL present: {bool(supabase_url)}")
+print(f"DEBUG: SUPABASE_KEY present: {bool(supabase_key)}")
+print(f"DEBUG: SUPABASE_DB_PASSWORD present: {bool(supabase_db_password)}")
+print(f"DEBUG: DATABASE_URL present: {bool(database_url)}")
+
+if supabase_url and supabase_key and supabase_db_password:
+    # Full Supabase PostgreSQL connection
+    print("INFO: Using Supabase PostgreSQL database")
+    DATABASES = {
+        'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
             'USER': 'postgres',
@@ -62,28 +70,26 @@ if os.environ.get('SUPABASE_URL') and os.environ.get('SUPABASE_KEY'):
             'CONN_MAX_AGE': 600,
             'CONN_HEALTH_CHECKS': True,
         }
-    else:
-        # Use SQLite as fallback if no database password
-        # (Supabase client will still work for direct queries)
-        DATABASES['default'] = {
+    }
+elif database_url:
+    # Fall back to DATABASE_URL (old Render PostgreSQL)
+    print("INFO: Using DATABASE_URL for database connection")
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=database_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # SQLite fallback (Supabase client API will still work for queries)
+    print("WARNING: Using SQLite fallback. Set SUPABASE_DB_PASSWORD for full PostgreSQL connection.")
+    DATABASES = {
+        'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
-        print("WARNING: Using SQLite fallback. Set SUPABASE_DB_PASSWORD for PostgreSQL connection.")
-elif os.environ.get('DATABASE_URL'):
-    # Fall back to DATABASE_URL if Supabase not configured
-    import dj_database_url
-    DATABASES['default'] = dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-else:
-    # No database configured - use SQLite as last resort
-    print("WARNING: No DATABASE_URL environment variable set, using SQLite")
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
     }
 
 # Email Settings
