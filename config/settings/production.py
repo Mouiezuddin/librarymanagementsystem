@@ -55,15 +55,23 @@ print(f"DEBUG: DATABASE_URL present: {bool(database_url)}")
 
 if supabase_url and supabase_key and supabase_db_password:
     # Full Supabase PostgreSQL connection
-    print("INFO: Using Supabase PostgreSQL database")
+    # Use session pooler which supports IPv4 - avoids IPv6 issues on Render free tier
+    # Get pooler host from SUPABASE_DB_HOST env var, or fall back to direct connection
+    supabase_db_host = os.environ.get(
+        'SUPABASE_DB_HOST',
+        f'db.{supabase_project_ref}.supabase.co'
+    )
+    supabase_db_user = os.environ.get('SUPABASE_DB_USER', 'postgres')
+    supabase_db_port = os.environ.get('SUPABASE_DB_PORT', '5432')
+    print(f"INFO: Using Supabase PostgreSQL database (host: {supabase_db_host})")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
-            'USER': 'postgres',
+            'USER': supabase_db_user,
             'PASSWORD': supabase_db_password,
-            'HOST': f'db.{supabase_project_ref}.supabase.co',
-            'PORT': '5432',
+            'HOST': supabase_db_host,
+            'PORT': supabase_db_port,
             'OPTIONS': {
                 'sslmode': 'require',
             },
