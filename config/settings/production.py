@@ -39,13 +39,52 @@ STORAGES = {
     },
 }
 
-# Database configuration can be pulled from DATABASE_URL
-import dj_database_url
-DATABASES['default'] = dj_database_url.config(
-    default=os.environ.get('DATABASE_URL'),
-    conn_max_age=600,
-    conn_health_checks=True,
-)
+# Database configuration
+# Use Supabase if configured, otherwise fall back to DATABASE_URL
+if os.environ.get('SUPABASE_URL') and os.environ.get('SUPABASE_KEY'):
+    # Using Supabase - construct PostgreSQL connection string
+    # Supabase PostgreSQL connection format
+    supabase_project_ref = os.environ.get('SUPABASE_PROJECT_REF', 'otnctayrocscihsmhhcs')
+    supabase_db_password = os.environ.get('SUPABASE_DB_PASSWORD', '')
+    
+    if supabase_db_password:
+        # If database password is provided, use direct PostgreSQL connection
+        DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': supabase_db_password,
+            'HOST': f'db.{supabase_project_ref}.supabase.co',
+            'PORT': '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+            'CONN_MAX_AGE': 600,
+            'CONN_HEALTH_CHECKS': True,
+        }
+    else:
+        # Use SQLite as fallback if no database password
+        # (Supabase client will still work for direct queries)
+        DATABASES['default'] = {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+        print("WARNING: Using SQLite fallback. Set SUPABASE_DB_PASSWORD for PostgreSQL connection.")
+elif os.environ.get('DATABASE_URL'):
+    # Fall back to DATABASE_URL if Supabase not configured
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+else:
+    # No database configured - use SQLite as last resort
+    print("WARNING: No DATABASE_URL environment variable set, using SQLite")
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
