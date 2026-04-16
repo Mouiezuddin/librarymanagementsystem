@@ -3,4 +3,5 @@ python-dotenv
 Pillow
 mysqlclient
 psycopg2-binary
+supabase>=2.0.0
 # other dependencies mentioned in README: Chart.js (usually via static), etc.

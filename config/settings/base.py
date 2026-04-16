@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.library.supabase_middleware.SupabaseSessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -84,6 +85,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# -- Supabase Configuration --
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_PROJECT_REF = os.environ.get('SUPABASE_PROJECT_REF')
+
 # -- Database --
 # (Keeping it simple in base, will be overridden in local/prod)
 DATABASES = {
@@ -99,6 +106,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# -- Authentication Backends --
+AUTHENTICATION_BACKENDS = [
+    'apps.library.supabase_auth.SupabaseAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # -- Internationalization --
