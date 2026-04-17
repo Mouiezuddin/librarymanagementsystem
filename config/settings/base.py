@@ -136,7 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # -- App-level Settings --
 FINE_PER_DAY = int(os.environ.get('FINE_PER_DAY', 2))
 DEFAULT_LOAN_DAYS = int(os.environ.get('DEFAULT_LOAN_DAYS', 14))
-ENABLE_PUBLIC_REGISTRATION = get_bool_env('ENABLE_PUBLIC_REGISTRATION', default=DEBUG)
+ENABLE_PUBLIC_REGISTRATION = get_bool_env('ENABLE_PUBLIC_REGISTRATION', default=True)
 ENABLE_SEED_TOOLS = get_bool_env('ENABLE_SEED_TOOLS', default=DEBUG)
 ENABLE_DEMO_DATA = get_bool_env('ENABLE_DEMO_DATA', default=DEBUG)
 
